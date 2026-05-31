@@ -1,73 +1,73 @@
-# React + TypeScript + Vite
+# Frontend Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Painel pra CRUD de mídias e playlists. Por enquanto roda com dados mockados, mas já está preparado pra consumir a API
 
-Currently, two official plugins are available:
+## Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React + TypeScript
+- Vite
+- Ant Design
+- Zustand
+- Tailwind CSS
+- React Router
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20+
+- npm 10+
 
-## Expanding the ESLint configuration
+## Como rodar
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Outros scripts:
+- npm run dev - usa VITE_USE_MOCK de .env.development
+- npm run dev:mock — força mock
+- npm run dev:api — força API
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Variáveis de ambiente
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Arquivos:
+- .env.development — usado no dev (mock ligado)
+- .env.production — build de produção
+- .env.test — testes
+
+Variáveis:
+- VITE_USE_MOCK — true usa mock, false usa API
+- VITE_API_BASE_URL — url da API (padrão http://localhost:5000/api)
+
+## O que tem no admin
+
+Mídias:
+- listar, criar, editar, excluir
+- upload de imagem/vídeo no cadastro
+- busca na listagem
+- preview de imagem/vídeo
+- layout responsivo
+
+Playlists:
+- criar, editar, excluir
+- adicionar/remover mídias
+- opção "exibir no player" (showOnPlayer)
+
+## Decisões técnicas
+
+Separei a comunicação com backend em services (media-service e playlist-service). Tem versão mock e versão api, escolhida pelo VITE_USE_MOCK.
+
+O Zustand guarda os dados em cache local. Na inicialização chama loadMedias() e loadPlaylists() pelos services.
+
+Separei os tipos: entidade, formulário e DTO da API (MediaResponse, CreateMediaRequest, etc).
+
+O upload de mídia usa arquivo (FormData). No mock, gera uma URL local pra exibição. Com a API, o backend salva o arquivo e devolve a URL.
+
+Os mocks ficam só na camada de services, componentes não importam mock direto.
+
+## Integração com API
+
+Quando a API estiver rodando:
+```
+npm run dev:api
 ```
