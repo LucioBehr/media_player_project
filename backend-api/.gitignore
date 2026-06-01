@@ -482,3 +482,10 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# SQLite e uploads locais
+*.db
+*.db-shm
+*.db-wal
+Medias/*
+!Medias/.gitkeep
