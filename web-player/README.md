@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+# Web Player
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Player React separado do admin. Exibe a playlist marcada com `showOnPlayer` no painel.
 
-Currently, two official plugins are available:
+## Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React + TypeScript
+- Vite
+- Zustand
+- React Router
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20+
+- npm 10+
 
-## Expanding the ESLint configuration
+## Como rodar
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Scripts:
+- `npm run dev` — usa `VITE_USE_MOCK` de `.env.development`
+- `npm run dev:mock` — dados mockados (sem API)
+- `npm run dev:api` — consome a API em `http://localhost:5000/api`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Porta padrão: **5174** (admin costuma ser 5173; ambos estão no CORS do backend).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Variáveis de ambiente
+
+- `VITE_USE_MOCK` — `true` mock, `false` API
+- `VITE_API_BASE_URL` — padrão `http://localhost:5000/api`
+
+## Estrutura (espelha o admin, escopo menor)
+
 ```
+src/
+  config/       env, endpoints, tempos do player
+  types/        Media, PlaylistResponse, PlaybackSnapshot
+  services/     http-client, player-service (mock + api)
+  mock/         dados para dev sem backend
+  store/        Zustand — playlist, índice atual, refresh
+  hooks/        timer de imagem
+  components/   tela, mídia, estado vazio
+  pages/        PlayerPage (polling)
+  routes/       rota única /
+```
+
+## Fluxo
+
+1. `PlayerPage` chama `refresh()` e repete a cada 10s (polling).
+2. `PlayerService` busca `GET /playlists/active` + `GET /medias` e monta a ordem.
+3. `PlayerScreen` mostra imagem (timer 8s) ou vídeo (`onEnded`).
+4. Transição simples com CSS `fade-in`.
+
+## Integração
+
+1. Subir API: `cd backend-api && dotnet run`
+2. No admin, marcar uma playlist como “exibir no player” e adicionar mídias.
+3. Subir player: `npm run dev:api`
