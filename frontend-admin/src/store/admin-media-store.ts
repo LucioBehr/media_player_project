@@ -55,9 +55,8 @@ const useAdminMediaStore = create<AdminMediaState>((set, get) => ({
       : {
           name: payload.name,
           description: payload.description,
-          type: payload.type,
-          url: payload.url,
         };
+    
     const response = await MediaService.createMedia(request);
     const media = mapMediaResponseToMedia(response);
 
@@ -70,9 +69,8 @@ const useAdminMediaStore = create<AdminMediaState>((set, get) => ({
       : {
           name: payload.name,
           description: payload.description,
-          type: payload.type,
-          url: payload.url,
         };
+    
     const response = await MediaService.updateMedia(mediaId, request);
     const media = mapMediaResponseToMedia(response);
 
@@ -97,21 +95,15 @@ const useAdminMediaStore = create<AdminMediaState>((set, get) => ({
     const response = await PlaylistService.createPlaylist(payload);
     const playlist = mapPlaylistResponseToPlaylist(response);
 
-    set((state) => ({
-      playlists: [playlist, ...state.playlists],
-      selectedPlaylistId: playlist.id,
-    }));
+    await get().loadPlaylists();
+    set({ selectedPlaylistId: playlist.id });
 
     return playlist.id;
   },
 
   updatePlaylist: async (playlistId, payload) => {
-    const response = await PlaylistService.updatePlaylist(playlistId, payload);
-    const playlist = mapPlaylistResponseToPlaylist(response);
-
-    set((state) => ({
-      playlists: state.playlists.map((item) => (item.id === playlistId ? playlist : item)),
-    }));
+    await PlaylistService.updatePlaylist(playlistId, payload);
+    await get().loadPlaylists();
   },
 
   deletePlaylist: async (playlistId) => {

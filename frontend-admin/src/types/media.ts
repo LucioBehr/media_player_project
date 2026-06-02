@@ -12,23 +12,17 @@ type Media = {
 type MediaFormValues = {
   name: string;
   description?: string;
-  type: MediaType;
-  url?: string;
   file?: File;
 };
 
 type CreateMediaRequest = {
   name: string;
   description?: string;
-  type: MediaType;
-  url?: string;
 };
 
 type UpdateMediaRequest = {
   name: string;
   description?: string;
-  type: MediaType;
-  url?: string;
 };
 
 type MediaResponse = {

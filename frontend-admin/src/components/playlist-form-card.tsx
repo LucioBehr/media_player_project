@@ -2,6 +2,7 @@ import { App, Button, Card, Flex, Form, Input, Switch } from "antd";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import type { Playlist, PlaylistFormValues } from "../types/playlist";
 import { useAdminMediaStore } from "../store/admin-media-store";
+import { useEffect } from "react";
 
 type PlaylistFormCardProps = {
   editingPlaylist: Playlist | null;
@@ -11,6 +12,17 @@ type PlaylistFormCardProps = {
 
 function PlaylistFormCard({ editingPlaylist, onCancelEdit, onFinish }: PlaylistFormCardProps) {
   const [form] = Form.useForm<PlaylistFormValues>();
+  useEffect(() => {
+    if (editingPlaylist) {
+      form.setFieldsValue({
+        name: editingPlaylist.name,
+        description: editingPlaylist.description,
+        showOnPlayer: editingPlaylist.showOnPlayer,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [editingPlaylist, form]);
   const { message } = App.useApp();
   const createPlaylist = useAdminMediaStore((state) => state.createPlaylist);
   const updatePlaylist = useAdminMediaStore((state) => state.updatePlaylist);
@@ -37,13 +49,13 @@ function PlaylistFormCard({ editingPlaylist, onCancelEdit, onFinish }: PlaylistF
       <Form
         form={form}
         layout="vertical"
-        initialValues={{
-          name: editingPlaylist?.name ?? "",
-          description: editingPlaylist?.description ?? "",
-          showOnPlayer: editingPlaylist?.showOnPlayer ?? false,
-        }}
+        //initialValues={{
+        //   name: editingPlaylist?.name ?? "",
+        //   description: editingPlaylist?.description ?? "",
+        //   showOnPlayer: editingPlaylist?.showOnPlayer ?? false,
+        // }}
         onFinish={handleSubmit}
-        key={editingPlaylist?.id ?? "create-playlist"}
+        // key={editingPlaylist?.id ?? "create-playlist"}
       >
         <Form.Item label="Nome" name="name" rules={[{ required: true, message: "Informe o nome." }]}>
           <Input placeholder="Ex: Recepção" />

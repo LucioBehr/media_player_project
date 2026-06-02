@@ -5,13 +5,13 @@ import {
   Flex,
   Form,
   Input,
-  Select,
   Typography,
   Upload,
 } from "antd";
 import { EditOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import type { Media, MediaFormValues } from "../types/media";
 import { useAdminMediaStore } from "../store/admin-media-store";
+import { useEffect } from "react";
 
 const { Text } = Typography;
 
@@ -27,17 +27,23 @@ function MediaFormCard({ editingMedia, onCancelEdit, onFinish }: MediaFormCardPr
   const createMedia = useAdminMediaStore((state) => state.createMedia);
   const updateMedia = useAdminMediaStore((state) => state.updateMedia);
 
+  useEffect(() => {
+    if (editingMedia) {
+      form.setFieldsValue({
+        name: editingMedia.name,
+        description: editingMedia.description,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [editingMedia, form]);
+
   async function handleSubmit(values: MediaFormValues) {
     const payload: MediaFormValues = {
       name: values.name,
       description: values.description,
-      type: values.type,
       file: values.file,
     };
-
-    if (editingMedia && !payload.file) {
-      payload.url = editingMedia.url;
-    }
 
     try {
       if (editingMedia) {
@@ -63,25 +69,10 @@ function MediaFormCard({ editingMedia, onCancelEdit, onFinish }: MediaFormCardPr
       <Form
         form={form}
         layout="vertical"
-        initialValues={{
-          name: editingMedia?.name ?? "",
-          description: editingMedia?.description ?? "",
-          type: editingMedia?.type ?? "image",
-        }}
         onFinish={handleSubmit}
-        key={editingMedia?.id ?? "create-media"}
       >
         <Form.Item label="Nome" name="name" rules={[{ required: true, message: "Informe o nome." }]}>
           <Input placeholder="Ex: Banner principal" />
-        </Form.Item>
-
-        <Form.Item label="Tipo" name="type" rules={[{ required: true, message: "Selecione o tipo." }]}>
-          <Select
-            options={[
-              { value: "image", label: "Imagem" },
-              { value: "video", label: "Vídeo" },
-            ]}
-          />
         </Form.Item>
 
         <Form.Item label="Descrição" name="description">

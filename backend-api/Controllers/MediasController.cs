@@ -23,33 +23,33 @@ public class MediasController(AppDbContext db, IWebHostEnvironment environment) 
         return medias.Select(m => ToResponse(m)).ToList();
     }
 
-    [HttpPost]
-    [Consumes("application/json")]
-    public async Task<ActionResult<MediaResponse>> CreateFromJson(
-        [FromBody] CreateMediaRequest request,
-        CancellationToken cancellationToken)
-    {
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
+    // [HttpPost]
+    // [Consumes("application/json")]
+    // public async Task<ActionResult<MediaResponse>> CreateFromJson(
+    //     [FromBody] CreateMediaRequest request,
+    //     CancellationToken cancellationToken)
+    // {
+    //     if (!ModelState.IsValid)
+    //     {
+    //         return ValidationProblem(ModelState);
+    //     }
 
-        var storedValue = request.Url?.Trim() ?? string.Empty;
+    //     var storedValue = request.Url?.Trim() ?? string.Empty;
 
-        if (string.IsNullOrEmpty(storedValue))
-        {
-            return BadRequest(new { message = "Informe uma URL ou envie um arquivo." });
-        }
+    //     if (string.IsNullOrEmpty(storedValue))
+    //     {
+    //         return BadRequest(new { message = "Informe uma URL ou envie um arquivo." });
+    //     }
 
-        var media = await SaveMediaAsync(
-            request.Name,
-            request.Description,
-            request.Type,
-            storedValue,
-            cancellationToken);
+    //     var media = await SaveMediaAsync(
+    //         request.Name,
+    //         request.Description,
+    //         request.Type,
+    //         storedValue,
+    //         cancellationToken);
 
-        return CreatedAtAction(nameof(GetAll), new { id = media.Id }, ToResponse(media));
-    }
+    //     return CreatedAtAction(nameof(GetAll), new { id = media.Id }, ToResponse(media));
+    // }
 
     [HttpPost]
     [Consumes("multipart/form-data")]
@@ -64,11 +64,15 @@ public class MediasController(AppDbContext db, IWebHostEnvironment environment) 
 
         try
         {
-            var storedValue = await ResolveStoredValueAsync(request.File, request.Url, null);
+            var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
+            var videoExtensions = new HashSet<string> { ".mp4", ".webm", ".mov" };
+            var mediaType = videoExtensions.Contains(extension) ? MediaType.Video : MediaType.Image;
+            var storedValue = await ResolveStoredValueAsync(request.File, null, null);
+            
             var media = await SaveMediaAsync(
                 request.Name,
                 request.Description,
-                request.Type,
+                mediaType,
                 storedValue,
                 cancellationToken);
 
@@ -80,7 +84,7 @@ public class MediasController(AppDbContext db, IWebHostEnvironment environment) 
         }
     }
 
-    [HttpPut("{id:guid}")]
+[HttpPut("{id:guid}")]
     [Consumes("application/json")]
     public async Task<ActionResult<MediaResponse>> UpdateFromJson(
         Guid id,
@@ -103,11 +107,13 @@ public class MediasController(AppDbContext db, IWebHostEnvironment environment) 
         media.Description = request.Description?.Trim() ?? string.Empty;
         media.Type = request.Type;
 
+        /*
         if (!string.IsNullOrWhiteSpace(request.Url))
         {
             DeletePreviousFileIfReplaced(media, request.Url.Trim());
             media.FileName = request.Url.Trim();
         }
+        */
 
         await db.SaveChangesAsync(cancellationToken);
 
@@ -135,7 +141,7 @@ public class MediasController(AppDbContext db, IWebHostEnvironment environment) 
 
         try
         {
-            var storedValue = await ResolveStoredValueAsync(request.File, request.Url, media.FileName);
+            var storedValue = await ResolveStoredValueAsync(request.File, null, media.FileName);
 
             if (storedValue != media.FileName)
             {
@@ -143,9 +149,12 @@ public class MediasController(AppDbContext db, IWebHostEnvironment environment) 
                 media.FileName = storedValue;
             }
 
+            var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
+            var videoExtensions = new HashSet<string> { ".mp4", ".webm", ".mov" };
+            
             media.Name = request.Name.Trim();
             media.Description = request.Description?.Trim() ?? string.Empty;
-            media.Type = request.Type;
+            media.Type = videoExtensions.Contains(extension) ? MediaType.Video : MediaType.Image;
 
             await db.SaveChangesAsync(cancellationToken);
 
@@ -238,12 +247,18 @@ public class MediasController(AppDbContext db, IWebHostEnvironment environment) 
         MediaFileHelper.DeleteStoredFile(StoragePath, media.FileName);
     }
 
-    private MediaResponse ToResponse(Media media) =>
-        new(
+    private MediaResponse ToResponse(Media media)
+    {
+        var physicalPath = Path.Combine(StoragePath, media.FileName);
+        var exists = System.IO.File.Exists(physicalPath);
+
+        return new(
             media.Id,
             media.Name,
             media.Description,
             media.Type,
-            MediaFileHelper.BuildPublicUrl(Request, media.FileName),
-            media.CreatedAt.ToString("yyyy-MM-dd"));
+            exists ? MediaFileHelper.BuildPublicUrl(Request, media.FileName) : "FILE_NOT_FOUND",
+            media.CreatedAt.ToString("yyyy-MM-dd")
+        );
+    }
 }
