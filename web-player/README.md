@@ -1,62 +1,77 @@
 # Web Player
 
-Player React separado do admin. Exibe a playlist marcada com `showOnPlayer` no painel.
+Aplicação responsável pela reprodução da playlist marcada para exibição no painel administrativo.
+
+O player consulta periodicamente a API para identificar alterações na playlist ativa e reproduz imagens e vídeos automaticamente.
+
+Para informações gerais sobre arquitetura e decisões técnicas do projeto, consulte o README da raiz.
 
 ## Tecnologias
 
-- React + TypeScript
-- Vite
-- Zustand
-- React Router
+* React
+* TypeScript
+* Vite
+* Zustand
+* React Router
 
 ## Requisitos
 
-- Node.js 20+
-- npm 10+
+* Node.js 20+
+* npm 10+
 
 ## Como rodar
 
-```
+```bash
 npm install
 npm run dev
 ```
 
-Scripts:
-- `npm run dev` — usa `VITE_USE_MOCK` de `.env.development`
-- `npm run dev:mock` — dados mockados (sem API)
-- `npm run dev:api` — consome a API em `http://localhost:5000/api`
-
-Porta padrão: **5174** (admin costuma ser 5173; ambos estão no CORS do backend).
-
 ## Variáveis de ambiente
 
-- `VITE_USE_MOCK` — `true` mock, `false` API
-- `VITE_API_BASE_URL` — padrão `http://localhost:5000/api`
-
-## Estrutura (espelha o admin, escopo menor)
-
+```env
+VITE_USE_MOCK=false
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
+
+## Scripts
+
+```bash
+npm run dev
+```
+
+Utiliza a configuração definida em `.env.development`.
+
+```bash
+npm run dev:mock
+```
+
+Força utilização de dados mockados.
+
+```bash
+npm run dev:api
+```
+
+Força utilização da API.
+
+## Funcionalidades
+
+* Reprodução automática de imagens
+* Reprodução automática de vídeos
+* Atualização periódica da playlist ativa
+* Estado vazio quando não existe playlist ativa
+* Transição simples entre mídias
+
+## Estrutura
+
+```text
 src/
-  config/       env, endpoints, tempos do player
-  types/        Media, PlaylistResponse, PlaybackSnapshot
-  services/     http-client, player-service (mock + api)
-  mock/         dados para dev sem backend
-  store/        Zustand — playlist, índice atual, refresh
-  hooks/        timer de imagem
-  components/   tela, mídia, estado vazio
-  pages/        PlayerPage (polling)
-  routes/       rota única /
+├── components/
+├── config/
+├── hooks/
+├── mock/
+├── pages/
+├── routes/
+├── services/
+├── store/
+└── types/
 ```
-
-## Fluxo
-
-1. `PlayerPage` chama `refresh()` e repete a cada 10s (polling).
-2. `PlayerService` busca `GET /playlists/active` + `GET /medias` e monta a ordem.
-3. `PlayerScreen` mostra imagem (timer 8s) ou vídeo (`onEnded`).
-4. Transição simples com CSS `fade-in`.
-
-## Integração
-
-1. Subir API: `cd backend-api && dotnet run`
-2. No admin, marcar uma playlist como “exibir no player” e adicionar mídias.
-3. Subir player: `npm run dev:api`
