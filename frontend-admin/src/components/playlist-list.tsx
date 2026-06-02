@@ -72,10 +72,10 @@ function PlaylistList({ onEditPlaylist }: PlaylistListProps) {
               ]}
             >
               <List.Item.Meta
-                title={playlist.name}
+                title={"Título: " + playlist.name}
                 description={
                   <Space direction="vertical" size={4}>
-                    <span>{playlist.description || "Sem descrição"}</span>
+                    <span>{"Descrição: " + (playlist.description || "Sem descrição")}</span>
                     <Space>
                       <Badge
                         status={playlist.showOnPlayer ? "success" : "default"}

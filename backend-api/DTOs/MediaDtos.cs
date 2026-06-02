@@ -20,8 +20,8 @@ public record CreateMediaRequest(
 public record UpdateMediaRequest(
     [Required, MaxLength(200)] string Name,
     [MaxLength(2000)] string? Description,
-    [Required] MediaType Type,
-    string? Url);
+    [Required] MediaType Type
+);
 
 public class MediaFormRequest
 {
@@ -32,9 +32,5 @@ public class MediaFormRequest
     public string? Description { get; set; }
 
     [Required]
-    public MediaType Type { get; set; }
-
-    public IFormFile? File { get; set; }
-
-    public string? Url { get; set; }
+    public IFormFile File { get; set; } = null!;
 }

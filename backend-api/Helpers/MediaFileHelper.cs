@@ -41,7 +41,7 @@ public static class MediaFileHelper
         var storedName = $"{Guid.NewGuid()}{extension}";
         var fullPath = Path.Combine(storagePath, storedName);
 
-        await using var stream = File.Create(fullPath);
+        await using var stream = System.IO.File.Create(fullPath);
         await file.CopyToAsync(stream);
 
         return storedName;
@@ -56,9 +56,9 @@ public static class MediaFileHelper
 
         var fullPath = Path.Combine(storagePath, storedValue);
 
-        if (File.Exists(fullPath))
+        if (System.IO.File.Exists(fullPath))
         {
-            File.Delete(fullPath);
+            System.IO.File.Delete(fullPath);
         }
     }
 }
