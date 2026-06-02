@@ -1,73 +1,76 @@
 # Frontend Admin
 
-Painel pra CRUD de mídias e playlists. Por enquanto roda com dados mockados, mas já está preparado pra consumir a API
+Painel administrativo responsável pelo gerenciamento de mídias e playlists.
+
+A aplicação consome a API do projeto e permite:
+
+* Criar, editar e excluir mídias
+* Fazer upload de imagens e vídeos
+* Criar, editar e excluir playlists
+* Associar e remover mídias de playlists
+* Definir qual playlist será exibida no player
+
+Para informações gerais sobre arquitetura e decisões técnicas do projeto, consulte o README da raiz.
 
 ## Tecnologias
 
-- React + TypeScript
-- Vite
-- Ant Design
-- Zustand
-- Tailwind CSS
-- React Router
+* React
+* TypeScript
+* Vite
+* Ant Design
+* Zustand
+* Tailwind CSS
+* React Router
 
 ## Requisitos
 
-- Node.js 20+
-- npm 10+
+* Node.js 20+
+* npm 10+
 
 ## Como rodar
 
-```
+```bash
 npm install
 npm run dev
 ```
 
-Outros scripts:
-- npm run dev - usa VITE_USE_MOCK de .env.development
-- npm run dev:mock — força mock
-- npm run dev:api — força API
-
 ## Variáveis de ambiente
 
-Arquivos:
-- .env.development — usado no dev (mock ligado)
-- .env.production — build de produção
-- .env.test — testes
-
-Variáveis:
-- VITE_USE_MOCK — true usa mock, false usa API
-- VITE_API_BASE_URL — url da API (padrão http://localhost:5000/api)
-
-## O que tem no admin
-
-Mídias:
-- listar, criar, editar, excluir
-- upload de imagem/vídeo no cadastro
-- busca na listagem
-- preview de imagem/vídeo
-- layout responsivo
-
-Playlists:
-- criar, editar, excluir
-- adicionar/remover mídias
-- opção "exibir no player" (showOnPlayer)
-
-## Decisões técnicas
-
-Separei a comunicação com backend em services (media-service e playlist-service). Tem versão mock e versão api, escolhida pelo VITE_USE_MOCK.
-
-O Zustand guarda os dados em cache local. Na inicialização chama loadMedias() e loadPlaylists() pelos services.
-
-Separei os tipos: entidade, formulário e DTO da API (MediaResponse, CreateMediaRequest, etc).
-
-O upload de mídia usa arquivo (FormData). No mock, gera uma URL local pra exibição. Com a API, o backend salva o arquivo e devolve a URL.
-
-Os mocks ficam só na camada de services, componentes não importam mock direto.
-
-## Integração com API
-
-Quando a API estiver rodando:
+```env
+VITE_USE_MOCK=false
+VITE_API_BASE_URL=http://localhost:5000/api
 ```
+
+## Scripts
+
+```bash
+npm run dev
+```
+
+Utiliza a configuração definida em `.env.development`.
+
+```bash
+npm run dev:mock
+```
+
+Força utilização de dados mockados.
+
+```bash
 npm run dev:api
+```
+
+Força utilização da API.
+
+## Estrutura
+
+```text
+src/
+├── components/
+├── config/
+├── mock/
+├── pages/
+├── routes/
+├── services/
+├── store/
+└── types/
 ```
